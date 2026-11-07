@@ -21,7 +21,36 @@ export let lastBackend = 'none';
 
 export type Msg = { role: 'user' | 'assistant'; content: string };
 
+// 0순위 OpenAI gpt-6-luna(Responses API). 전화 답변용으로 생각 단계 없이(none) 빠른 등급(fast)으로 부른다. 키가 없거나 실패하면 Bedrock으로 넘어간다.
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-6-luna';
+let openaiDownUntil = 0;
+
+async function openai(system: string, messages: Msg[], maxTokens: number): Promise<string> {
+  const r = await fetch('https://api.openai.com/v1/responses', {
+    method: 'POST',
+    headers: { authorization: `Bearer ${process.env.OPENAI_API_KEY}`, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      model: OPENAI_MODEL, store: false, service_tier: 'fast', reasoning: { effort: 'none' }, max_output_tokens: maxTokens,
+      instructions: system, input: messages.map((m) => ({ role: m.role, content: m.content })),
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  const j: any = await r.json();
+  if (!r.ok) throw new Error(`openai ${r.status}: ${String(j?.error?.message ?? '').slice(0, 80)}`);
+  return (j.output ?? []).filter((o: any) => o.type === 'message')
+    .flatMap((o: any) => (o.content ?? []).map((c: any) => c.text ?? '')).join('').trim();
+}
+
 export async function llm(system: string, messages: Msg[], maxTokens = 400, temperature = 0.8): Promise<string> {
+  if (process.env.OPENAI_API_KEY && Date.now() > openaiDownUntil) {
+    try {
+      const t = await openai(system, messages, maxTokens);
+      if (t) { lastBackend = 'openai'; return t; }
+    } catch (e) {
+      openaiDownUntil = Date.now() + 60_000;
+      console.warn('[llm] openai 실패, Bedrock으로 전환:', (e as Error).message.slice(0, 90));
+    }
+  }
   if (Date.now() > bedrockDownUntil) {
     try {
       const out = await bedrock.send(new ConverseCommand({
