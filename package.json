@@ -1,0 +1,12 @@
+{
+  "name": "hyojason",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -F server dev",
+    "build": "pnpm -F web build",
+    "start": "pnpm -F server start"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.0"
+  }
+}

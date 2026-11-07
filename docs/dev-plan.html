@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>[맥스튜디오] 효자손 개발 기획서</title>
+<style>
+:root{--ink:#37352f;--ink2:#787774;--ink3:#9b9a97;--line:#e9e9e7;--line2:#f1f1ef;--tint:#f7f7f5;
+--acc:#d9730d;--accbg:#fdf3e8;--red:#c4554d;--redbg:#fbeeee;--green:#4d7c5f;--greenbg:#eef4f0;--blue:#487ca5;--bluebg:#eef3f7}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:16px/1.75 -apple-system,"Apple SD Gothic Neo",Pretendard,sans-serif;letter-spacing:-.01em}
+main{max-width:860px;margin:0 auto;padding:52px 22px 96px}
+h1{font-size:32px;line-height:1.3;margin:0 0 10px}
+h2{font-size:23px;line-height:1.4;margin:52px 0 12px;padding-top:20px;border-top:1px solid var(--line)}
+h3{font-size:18px;margin:28px 0 8px}
+p{margin:10px 0}
+.sub{color:var(--ink2);font-size:15px}
+.num{color:var(--ink3);margin-right:6px}
+.callout{display:flex;gap:12px;padding:14px 16px;border-radius:8px;background:var(--tint);margin:16px 0}
+.callout .ic{flex:none;font-size:18px}
+.callout.acc{background:var(--accbg)}.callout.red{background:var(--redbg)}.callout.green{background:var(--greenbg)}.callout.blue{background:var(--bluebg)}
+.callout p{margin:3px 0}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14.5px;line-height:1.6;min-width:560px}
+th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+th{background:var(--tint);color:var(--ink2);font-weight:600}
+code{font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--line2);padding:1px 5px;border-radius:4px;word-break:break-all}
+pre{background:var(--tint);border-radius:8px;padding:12px 14px;overflow-x:auto;font:12.5px/1.6 ui-monospace,Menlo,monospace}
+pre code{background:none;padding:0;word-break:normal}
+.tag{display:inline-block;white-space:nowrap;font-size:12px;padding:1px 8px;border-radius:10px;background:var(--line2);color:var(--ink2)}
+.tag.g{background:var(--greenbg);color:var(--green)}.tag.a{background:var(--accbg);color:var(--acc)}.tag.r{background:var(--redbg);color:var(--red)}
+figure{margin:18px 0}
+figure svg{width:100%;height:auto;display:block}
+figcaption{color:var(--ink2);font-size:14px;margin-top:6px}
+.scroller{overflow-x:auto}
+.hint{display:none;color:var(--ink3);font-size:13px}
+.toc{background:var(--tint);border-radius:8px;padding:12px 18px;font-size:15px}
+.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+.step{border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin:10px 0}
+.step h4{margin:0 0 4px;font-size:16px}
+.step .done{color:var(--green);font-size:14px}
+ol.flow{padding-left:22px}ol.flow li{margin:6px 0}
+@media (max-width:640px){main{padding:34px 16px 70px}h1{font-size:26px}h2{font-size:20px}.scroller{margin:0 -16px;padding:0 16px}figure svg{width:700px;max-width:none}.hint{display:block}}
+</style>
+</head>
+<body>
+<main>
+<p class="sub">OBA.RUN 2기 · 효자손 · 맥스튜디오 작업본 · 2026-11-07 13:56 작성 · 코드 프리즈 17:00</p>
+<h1>무엇을 어떤 순서로 만드는지: 서버 하나, 화면 하나, 외부 서비스 다섯 개</h1>
+<p>효자손은 결국 <b>"AI가 돈을 보내려 하면, 자녀가 정한 규칙이 서명 전에 막는다"</b>를 보여 주는 제품입니다. 그 장면을 행사장 사람들이 직접 만들게 하는 게 "AI 할머니 털어 봐" 챌린지이고, 실제 고객이 쓰는 모습을 보여 주는 게 엄마 통화와 가족방입니다.</p>
+
+<div class="callout acc"><div class="ic">⏱</div><div>
+<p><b>바쁘면 여기만 보세요.</b> 2절 그림이 전체 구조입니다. 7절이 만드는 순서이고, 단계마다 "이게 되면 끝"이 적혀 있습니다.</p>
+<p>제일 먼저 만드는 건 <b>챌린지(텍스트 채팅 + 마루 거절)</b>입니다. 행사장 사람을 모으는 장치라서 일찍 열수록 표가 쌓입니다.</p>
+</div></div>
+
+<nav class="toc"><ol>
+<li><a href="#s1">만드는 것: 화면 5개와 그 뒤의 기능</a></li>
+<li><a href="#s2">전체 구조</a></li>
+<li><a href="#s3">핵심 흐름 세 개</a></li>
+<li><a href="#s4">서버가 여는 주소(API)</a></li>
+<li><a href="#s5">저장하는 데이터</a></li>
+<li><a href="#s6">외부 서비스 붙이는 법</a></li>
+<li><a href="#s7">만드는 순서와 완료 기준</a></li>
+<li><a href="#s8">제출과 데모 준비</a></li>
+<li><a href="#s9">막힐 때 대안</a></li>
+</ol></nav>
+
+<h2 id="s1"><span class="num">1</span>만드는 것: 화면 5개와 그 뒤의 기능</h2>
+<div class="tw"><table>
+<tr><th>화면</th><th>누가 보나</th><th>뒤에서 일어나는 일</th><th>우선순위</th></tr>
+<tr><td>① 챌린지 <code>/play</code></td><td>행사장 참가자(폰)</td><td>할머니 대답(LLM) → 할머니 목소리(ElevenLabs) → 사기 판정(Bivia) → 송금 시도(마루) → 거절</td><td><span class="tag r">1순위</span></td></tr>
+<tr><td>② 리더보드 <code>/board</code></td><td>행사장 큰 화면</td><td>시도·넘어감·털린 돈·막은 금액 실시간 집계, 거절 소리 재생</td><td><span class="tag r">1순위</span></td></tr>
+<tr><td>③ 엄마 통화 <code>/mom</code></td><td>무대 데모(엄마 역)</td><td>Vapi 통화(할머니 목소리) → 결제봇 도구 → 마루 송금 성공</td><td><span class="tag a">2순위</span></td></tr>
+<tr><td>④ 자녀 설정 <code>/family/settings</code></td><td>무대 데모(자녀 역)</td><td>한도·허용 상점 저장 → 마루 지갑 정책(<code>policy.set</code>)</td><td><span class="tag a">2순위</span></td></tr>
+<tr><td>⑤ 가족방 <code>/family</code></td><td>무대 데모(자녀 역)</td><td>결제·차단 기록, 아침 브리핑(LLM), 한도 초과 승인 버튼</td><td><span class="tag g">3순위</span></td></tr>
+</table></div>
+<p>시안은 레포의 <code>design/mockups.html</code>에 있습니다. 화면은 그 시안을 그대로 옮깁니다.</p>
+
+<h2 id="s2"><span class="num">2</span>전체 구조</h2>
+<figure>
+<p class="hint">← 좌우로 밀어서 보세요</p>
+<div class="scroller">
+<svg viewBox="0 0 800 380" font-family="-apple-system,Apple SD Gothic Neo,sans-serif" font-size="13">
+<defs><marker id="m" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8z" fill="#9b9a97"/></marker></defs>
+<g fill="#fff" stroke="#e9e9e7" stroke-width="1.5">
+<rect x="10" y="40" width="170" height="64" rx="8"/>
+<rect x="10" y="150" width="170" height="64" rx="8"/>
+<rect x="10" y="260" width="170" height="64" rx="8"/>
+<rect x="280" y="120" width="210" height="130" rx="10" fill="#fdf3e8" stroke="#d9730d"/>
+<rect x="590" y="10" width="200" height="50" rx="8"/>
+<rect x="590" y="74" width="200" height="50" rx="8"/>
+<rect x="590" y="138" width="200" height="50" rx="8"/>
+<rect x="590" y="202" width="200" height="50" rx="8"/>
+<rect x="590" y="266" width="200" height="50" rx="8"/>
+<rect x="590" y="324" width="200" height="46" rx="8" fill="#f7f7f5"/>
+</g>
+<g fill="#37352f" text-anchor="middle">
+<text x="95" y="68">화면 (Vercel)</text><text x="95" y="88" fill="#787774" font-size="12">/play /board /family</text>
+<text x="95" y="178">엄마 통화 화면</text><text x="95" y="198" fill="#787774" font-size="12">Vapi Web SDK</text>
+<text x="95" y="288">Vapi 클라우드</text><text x="95" y="308" fill="#787774" font-size="12">도구 호출 → 우리 서버</text>
+<text x="385" y="150" font-size="15" font-weight="700">우리 서버 (맥스튜디오)</text>
+<text x="385" y="172" fill="#787774" font-size="12">Hono · SQLite · SSE</text>
+<text x="385" y="192" fill="#787774" font-size="12">cloudflared 공개 주소</text>
+<text x="385" y="216" fill="#d9730d" font-size="12">MAWS 로그인은 이 맥에만</text>
+<text x="690" y="40">마루 MAWS · 테스트넷</text>
+<text x="690" y="104">Articul8 Bivia</text>
+<text x="690" y="168">ElevenLabs 목소리</text>
+<text x="690" y="232">LLM 프록시 :10100</text>
+<text x="690" y="296">Vapi API</text>
+<text x="690" y="352" fill="#787774">Explorer (증거 링크)</text>
+</g>
+<g stroke="#9b9a97" stroke-width="1.5" fill="none" marker-end="url(#m)">
+<path d="M180,72 C230,72 240,140 276,150"/>
+<path d="M180,182 C230,182 240,182 276,182"/>
+<path d="M180,292 C230,292 240,225 276,215"/>
+<path d="M490,140 C540,120 550,40 586,35"/>
+<path d="M490,155 C540,140 550,99 586,99"/>
+<path d="M490,175 C540,170 550,163 586,163"/>
+<path d="M490,200 C540,205 550,227 586,227"/>
+<path d="M490,230 C540,250 550,291 586,291"/>
+</g>
+</svg>
+</div>
+<figcaption>알아야 할 것: 모든 키와 결제는 가운데 서버(맥스튜디오)에만 있습니다. 화면은 서버만 부르고, 키를 모릅니다.</figcaption>
+</figure>
+<div class="callout blue"><div class="ic">💡</div><div><p><b>왜 서버를 이 맥에서 돌리나.</b> 마루 에이전트 지갑(MAWS)은 <code>m-aws login</code>으로 받은 로그인 정보로 움직이는데, 그 정보가 이 맥(<code>MAWS 로그인 정보</code>)에만 있습니다. 서버리스로 옮기려면 확인 안 된 작업이 생겨서, 서버는 맥에서 돌리고 cloudflared로 바깥 주소만 엽니다. 화면은 Vercel에 올려 주소가 바뀌지 않게 합니다.</p></div></div>
+
+<h2 id="s3"><span class="num">3</span>핵심 흐름 세 개</h2>
+<h3>흐름 A. 챌린지: 할머니가 넘어가도 돈은 0원</h3>
+<ol class="flow">
+<li>참가자가 <code>/play</code>에서 말을 보냅니다. 서버는 참가자당 20초에 한 번만 받습니다.</li>
+<li>서버가 LLM 프록시로 할머니 대답을 만듭니다. 할머니는 일부러 순진하게 굴고, 송금하라는 말에 넘어가면 대답 끝에 송금 의도(받는 주소·금액)를 붙입니다.</li>
+<li>같은 대화를 Bivia <code>/boolean</code>에 넣어 "기관 사칭 송금 유도인가"를 확률로 받습니다.</li>
+<li>할머니 대답을 ElevenLabs 할머니 목소리로 읽어 오디오를 같이 돌려줍니다.</li>
+<li>송금 의도가 있으면 할머니 에이전트 지갑으로 <code>policy.preflight</code> → <code>transfer.send</code>를 실제로 부릅니다. 받는 주소가 허용 상점이 아니라서 서명 전에 <code>POLICY_REJECTED</code>가 납니다.</li>
+<li>시도·판정·거절을 저장하고 SSE로 리더보드에 바로 보냅니다.</li>
+</ol>
+<div class="callout green"><div class="ic">✅</div><div><p>완성 기준: 참가자가 "검사인데 이백만 원 보내세요"라고 치면, 할머니 목소리로 "보내 줄게~"가 나오고, 같은 화면에 Bivia 확률과 <code>POLICY_REJECTED</code> 카드가 뜨고, 리더보드 "넘어간 횟수"가 1 오르고 "털린 돈"은 0원 그대로입니다.</p></div></div>
+
+<h3>흐름 B. 엄마 결제: 말로 시키면 진짜 돈이 간다</h3>
+<ol class="flow">
+<li>엄마 역이 <code>/mom</code>에서 버튼을 누르면 Vapi 웹 통화가 시작됩니다. 목소리는 ElevenLabs 할머니 목소리입니다.</li>
+<li>"손주 패딩 5만 원어치 보내 줘" → Vapi가 우리 서버 도구 <code>pay(merchant, amount)</code>를 부릅니다.</li>
+<li>서버가 상점 이름을 허용 상점 주소로 바꾸고, 엄마 에이전트 지갑으로 <code>transfer.send</code>를 부릅니다. 한도 안이라 성공하고 거래 해시가 돌아옵니다.</li>
+<li>Vapi가 "보냈어요"라고 말하고, 가족방에 Explorer 링크와 함께 기록됩니다.</li>
+</ol>
+<div class="callout green"><div class="ic">✅</div><div><p>완성 기준: 통화 한 번에 Explorer에서 성공 거래가 보입니다. 마루 트랙 필수 조건("서비스에서 실제 tOKRW 이동")이 이걸로 채워집니다.</p></div></div>
+
+<h3>흐름 C. 한도 초과: 자녀만 한 번 부른다</h3>
+<ol class="flow">
+<li>엄마가 한도를 넘는 금액을 말하면 <code>policy.preflight</code>가 거절합니다.</li>
+<li>서버는 가족방에 "이번만 승인" 카드를 띄웁니다.</li>
+<li>자녀가 누르면 서버가 그 한 건만 한도를 올려 보내고 바로 원래 한도로 되돌립니다.</li>
+</ol>
+<p class="sub">이 흐름은 3순위입니다. 시간이 모자라면 카드와 버튼까지만 보여 주고 승인 송금은 빼도 데모가 성립합니다.</p>
+
+<h2 id="s4"><span class="num">4</span>서버가 여는 주소(API)</h2>
+<div class="tw"><table>
+<tr><th>주소</th><th>누가 부르나</th><th>하는 일</th></tr>
+<tr><td><code>POST /api/play/message</code></td><td>챌린지 화면</td><td>{닉네임, 문장} → 할머니 대답·오디오·판정·송금 결과. 20초 제한</td></tr>
+<tr><td><code>GET /api/board</code></td><td>리더보드</td><td>시도 수, 넘어간 수, 털린 돈, 막은 금액, 명예의 전당, 최근 시도</td></tr>
+<tr><td><code>GET /api/events</code></td><td>리더보드·가족방</td><td>SSE. 새 시도·결제·거절이 생기면 바로 보냄</td></tr>
+<tr><td><code>POST /api/vapi/tools</code></td><td>Vapi</td><td>도구 호출 받기: <code>pay</code>, <code>check_scam</code>, <code>notify_family</code></td></tr>
+<tr><td><code>GET/POST /api/family/policy</code></td><td>자녀 설정</td><td>한도·허용 상점 읽기/저장 → MAWS <code>policy.set</code></td></tr>
+<tr><td><code>GET /api/family/feed</code></td><td>가족방</td><td>결제·차단 기록, 아침 브리핑 문장</td></tr>
+<tr><td><code>POST /api/family/approve</code></td><td>가족방</td><td>한도 초과 한 건 승인(3순위)</td></tr>
+</table></div>
+
+<h2 id="s5"><span class="num">5</span>저장하는 데이터</h2>
+<p>행사 하루짜리라 SQLite 파일 하나면 충분합니다.</p>
+<div class="tw"><table>
+<tr><th>테이블</th><th>내용</th></tr>
+<tr><td><code>attempts</code></td><td>닉네임, 사기꾼 문장, 할머니 대답, Bivia 확률, 넘어갔는지, 송금 시도 금액·주소, 결과(거절 사유·거래 해시), 시각</td></tr>
+<tr><td><code>payments</code></td><td>엄마 결제: 상점, 금액, 거래 해시, 결과</td></tr>
+<tr><td><code>feed</code></td><td>가족방 카드: 종류(결제·차단·승인요청·브리핑), 본문, 시각</td></tr>
+<tr><td><code>config</code></td><td>에이전트 ID(할머니·엄마), 허용 상점 주소 목록, 한도</td></tr>
+</table></div>
+
+<h2 id="s6"><span class="num">6</span>외부 서비스 붙이는 법</h2>
+<h3>마루 (돈이 실제로 움직이고 막히는 곳)</h3>
+<ul>
+<li>서버가 <code>m-aws serve</code>를 자식 프로세스로 띄워 MCP로 도구를 부릅니다. 22개 도구 중 <code>agent.create</code>, <code>agent.fund</code>, <code>policy.set</code>, <code>policy.preflight</code>, <code>transfer.send</code>, <code>agent.balance</code>를 씁니다.</li>
+<li>에이전트 두 개를 만듭니다: <code>맥스튜디오-순자할머니</code>(챌린지용), <code>맥스튜디오-엄마</code>(결제용). 가스는 기본값인 대납(PAYMASTER)이라 에이전트가 가스를 안 냅니다.</li>
+<li><code>policy.set</code>에 <code>spendingLimit</code>(건당 한도)와 <code>allowedTargets</code>(허용 주소, 쉼표로 이음)를 넣습니다. 허용 상점 주소는 테스트 지갑 3개(관리사무소·약국·쇼핑몰)를 만들어 씁니다.</li>
+<li>주의: 이 정책은 체인에 기록되지만 <b>지키는 건 MAWS</b>입니다(마루 문서와 도구 설명에 명시). 발표에서는 "에이전트 지갑이 서명을 거부한다"로 말합니다. 시간이 남으면 PCL 규칙(<code>policy.maroo.io</code>)을 추가로 걸어 "체인이 직접 막는다"까지 말합니다.</li>
+<li>지갑 잔액: 소유자 지갑에 5,000 tOKRW가 있습니다. Faucet은 10분에 5번, 1만 이상이면 안 줍니다. 데모 금액은 화면에 원 단위로 보여 주고 체인에는 소액(예: 1원=0.01 tOKRW 비율)으로 보냅니다.</li>
+</ul>
+<h3>Vapi (엄마 통화)</h3>
+<ul>
+<li>어시스턴트 <code>[맥스튜디오] 효자손 엄마 통화</code>를 API로 만듭니다. 목소리는 ElevenLabs 할머니 목소리 ID, 받아쓰기는 한국어, 모델은 Vapi 기본 모델입니다.</li>
+<li>도구 3개의 서버 주소를 cloudflared 주소의 <code>/api/vapi/tools</code>로 둡니다.</li>
+</ul>
+<h3>ElevenLabs (어그로 담당)</h3>
+<ul>
+<li>목소리 두 개가 이미 있습니다: <code>[맥스튜디오] 순자 할머니</code>, <code>[맥스튜디오] 가짜 김검사</code>.</li>
+<li>챌린지 대답마다 할머니 목소리 TTS를 만들어 폰과 리더보드에서 재생합니다. 한도는 3,300만 자 중 194만 자 사용이라 충분합니다.</li>
+<li>무대용 "사기범 vs 할머니" 42초 통화 데모는 이미 만들어져 있습니다(<code>design/voice-demo.html</code>).</li>
+</ul>
+<h3>Bivia와 LLM</h3>
+<ul>
+<li>Bivia <code>/boolean</code>: 실제 호출에서 사칭 문장에 yes 99.98%. <code>abstained</code>면 "판정 보류"로 표시합니다.</li>
+<li>LLM은 이 맥 프록시 <code>127.0.0.1:10100</code>의 <code>gpt-6-sol--fast</code>(응답 약 6초). 할머니 대답과 아침 브리핑에만 씁니다.</li>
+</ul>
+
+<h2 id="s7"><span class="num">7</span>만드는 순서와 완료 기준</h2>
+<p>앞 단계가 끝나야 다음 단계가 의미 있는 순서입니다. 단계마다 "이게 되면 끝"을 실제로 확인하고 넘어갑니다.</p>
+<div class="step"><h4>1. 레포 뼈대와 마루 준비</h4><p>pnpm 워크스페이스(<code>apps/server</code>, <code>apps/web</code>), 에이전트 2개 생성·충전, 상점 지갑 3개 생성, 할머니 지갑 정책(허용 상점만, 건당 한도) 설정.</p><p class="done">끝 = <code>policy.preflight</code>가 상점 주소엔 통과, 낯선 주소엔 거절을 돌려줌</p></div>
+<div class="step"><h4>2. 챌린지 서버</h4><p><code>/api/play/message</code>: LLM 할머니 대답 → Bivia → ElevenLabs → 송금 시도 → 저장 → SSE.</p><p class="done">끝 = curl 한 번에 대답·확률·오디오·<code>POLICY_REJECTED</code>가 함께 옴</p></div>
+<div class="step"><h4>3. 챌린지·리더보드 화면 + 공개</h4><p><code>/play</code>, <code>/board</code>를 시안대로 만들고 Vercel 배포, 서버는 cloudflared로 공개.</p><p class="done">끝 = 폰으로 QR 찍어 사기 한 번 → 큰 화면 숫자가 바로 오름. 이 시점에 QR 포스터 배포</p></div>
+<div class="step"><h4>4. 엄마 결제</h4><p>엄마 에이전트 정책, <code>/api/vapi/tools</code>의 <code>pay</code>, Vapi 어시스턴트, <code>/mom</code> 화면.</p><p class="done">끝 = 통화로 "5만 원 보내 줘" → Explorer에 성공 거래</p></div>
+<div class="step"><h4>5. 자녀 설정·가족방</h4><p><code>/family/settings</code>(정책 저장), <code>/family</code>(기록·브리핑·승인 카드).</p><p class="done">끝 = 설정에서 한도를 바꾸면 <code>policy.get</code>에 반영되고, 가족방에 결제·차단 카드가 쌓임</p></div>
+<div class="step"><h4>6. 제출물</h4><p>빌드 보드 등록, README 실행 방법, 거래 해시·거절 증거 정리, 데모 녹화.</p><p class="done">끝 = 빌드 보드에 "제출"로 표시</p></div>
+
+<h2 id="s8"><span class="num">8</span>제출과 데모 준비</h2>
+<ul>
+<li><b>빌드 보드:</b> 트랙은 Maroo 체크(Vooy는 계정이 나오면). GitHub URL은 이 레포, 데모 URL은 Vercel 주소.</li>
+<li><b>마루 트랙 증거:</b> 성공 거래 Explorer 링크(엄마 결제)와 거절 기록(챌린지)을 README에 붙입니다.</li>
+<li><b>무대 3분:</b> 42초 사기범 vs 할머니 음성으로 시작 → 엄마 통화 결제 → 리더보드 "넘어간 횟수 N, 털린 돈 0원"으로 마무리.</li>
+<li><b>녹화 백업:</b> 무대에서 마이크·와이파이가 죽을 때를 대비해 전체 흐름을 미리 녹화합니다.</li>
+<li><b>키 관리:</b> <code>.env</code>는 커밋하지 않습니다(이미 <code>.gitignore</code>에 있음).</li>
+</ul>
+
+<h2 id="s9"><span class="num">9</span>막힐 때 대안</h2>
+<div class="tw"><table>
+<tr><th>막히는 곳</th><th>대안</th></tr>
+<tr><td>MAWS 에이전트 등록이 오래 걸림(1~3분 대기)</td><td>지금 바로 만들어 둡니다. 실패하면 <code>agent.retry_registration</code></td></tr>
+<tr><td>MAWS 로그인 만료(오늘 14:21 만료로 표시됨)</td><td><code>m-aws login kakao</code> 다시. 카카오는 Aside에 로그인돼 있어 제가 처리합니다</td></tr>
+<tr><td>Vapi 도구 호출이 cloudflared 주소에 안 닿음</td><td>무대에서는 웹 화면 버튼으로 같은 <code>pay</code>를 부르게 해 둡니다</td></tr>
+<tr><td>LLM 6초가 챌린지에 느림</td><td>"할머니가 생각 중…" 표시 + 대답 텍스트 먼저, 목소리는 뒤에</td></tr>
+<tr><td>행사장 와이파이 불안</td><td>리더보드는 노트북 한 대에서 재생, 녹화본 준비</td></tr>
+</table></div>
+<div class="callout red"><div class="ic">⚠️</div><div><p><b>MAWS 로그인 토큰이 오늘 14:21(한국 시간)에 만료됩니다.</b> 개발 시작 전에 다시 로그인해 둘게요. 카카오 승인은 Aside에서 제가 처리합니다.</p></div></div>
+
+<p class="sub" style="margin-top:36px">근거: 마루 MAWS 도구 22개와 policy.set 설명(이 맥에서 <code>m-aws serve</code> 직접 조회), 마루 문서 지출 한도 튜토리얼, 노션 빌더 가이드, 오늘 실제 호출 결과(Vapi 200, Bivia 99.98%, ElevenLabs 데모 받아쓰기 일치).</p>
+</main>
+</body>
+</html>
