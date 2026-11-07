@@ -140,7 +140,7 @@ export default function Play() {
                     <span className="ico"><ShieldX size={20} /></span>
                     <h3>할머니는 넘어갔지만, 나간 돈은 {won(r.lostKrw)}이에요.</h3>
                   </div>
-                ) : <h3>아직 안 넘어갔어요. 더 그럴듯하게 해 보세요.</h3>}
+                ) : <h3>할머니한테 놀림당했어요.{(r as any).holdMs ? ` 사기꾼 붙잡힌 시간 +${Math.round((r as any).holdMs / 1000)}초` : ''}</h3>}
                 {p != null && (
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}><span>사기 확률</span><span className="num">{p}%</span></div>

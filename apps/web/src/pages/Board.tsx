@@ -58,7 +58,7 @@ export default function Board() {
   return (
     <div className="board">
       <header className="b-head">
-        <h1>AI 순자 할머니는 <em>넘어가도 0원</em>이에요</h1>
+        <h1>AI 순자 할머니한테 <em>털린 돈 0원</em></h1>
         <button className={'btn ' + (sound ? 'weak' : 'night')} onClick={sound ? disableSound : enableSound} style={sound ? { background: 'transparent', color: 'var(--night-text)', borderColor: 'var(--night-line)' } : undefined}>
           {sound ? <><VolumeX size={20} />{HOST ? '소리·AI 대결 끄기' : '소리 끄기'}</> : <><Volume2 size={20} />{HOST ? '소리 켜고 AI 대결 시작' : '소리 켜기'}</>}
         </button>
@@ -66,9 +66,9 @@ export default function Board() {
       <p className="b-why">2025 보이스피싱 피해 1조 2,578억 원 · 피해자 53%가 50대 이상 · AI가 속아도 돈은 안 나가요: 자녀가 정한 규칙을 에이전트 지갑이 서명 전에 지켜요</p>
       <div className="b-stats">
         <div className="b-stat"><div className="k">사기꾼 붙잡아 둔 시간</div><div className="v">{holdS >= 60 ? <>{Math.floor(holdS / 60)}<span className="u">분</span> {holdS % 60}</> : holdS}<span className="u">초</span></div></div>
-        <div className="b-stat"><div className="k">할머니가 넘어간 횟수</div><div className="v">{st.fell}<span className="u">번</span></div></div>
+        <div className="b-stat"><div className="k">사기 시도</div><div className="v">{st.attempts}<span className="u">번</span></div></div>
         <div className="b-stat zero"><div className="k">털린 돈</div><div className="v">{st.lostKrw.toLocaleString('ko-KR')}<span className="u">원</span></div></div>
-        <div className="b-stat block"><div className="k">지갑이 막은 금액</div><div className="v">{st.blockedKrw.toLocaleString('ko-KR')}<span className="u">원</span></div></div>
+        <div className="b-stat block"><div className="k">할머니가 거절한 금액</div><div className="v">{st.blockedKrw.toLocaleString('ko-KR')}<span className="u">원</span></div></div>
       </div>
       <section className="b-card b-battle" aria-label="AI 김검사 대 AI 순자">
         <h2 style={{ display: 'flex', alignItems: 'center', gap: 10 }}><Swords size={22} />AI 김검사 vs AI 순자</h2>
@@ -88,10 +88,10 @@ export default function Board() {
           <div className="num qr-url">{origin.replace(/^https?:\/\//, '')}/play</div>
         </section>
         <section className="b-card">
-          <h2>명예의 전당</h2>
+          <h2>가장 오래 놀림당한 사기꾼</h2>
           {st.hall.length === 0 ? <p style={{ color: 'var(--night-muted)', margin: 0 }}>아직 없어요.</p> : (
             <ol className="b-list">{st.hall.map((h, i) => (
-              <li key={h.nick}><span className="rank">{i + 1}</span><span className="grow"><span className="nm">{h.nick}</span><br /><span className="sub">{h.tries}번 만에 · 사기 판정 {pct(h.prob) ?? '-'}%</span></span><b className="num">{won(h.best)}</b></li>
+              <li key={h.nick}><span className="rank">{i + 1}</span><span className="grow"><span className="nm">{h.nick}</span><br /><span className="sub">{h.tries}번 시도 · 사기 판정 {pct(h.prob) ?? '-'}%</span></span><b className="num">{Math.round(h.best / 1000)}초</b></li>
             ))}</ol>
           )}
         </section>
@@ -99,7 +99,7 @@ export default function Board() {
           <h2>최근 시도</h2>
           {st.recent.length === 0 ? <p style={{ color: 'var(--night-muted)', margin: 0 }}>아직 없어요.</p> : (
             <ul className="b-list">{st.recent.map((r) => (
-              <li key={r.id}><span className="grow"><span className="nm">{r.nick}</span><br /><span className="sub">{hhmm(r.ts)} · {r.fell ? '넘어감 ' + won(r.amountKrw) + ' → 거절' : '버팀'}</span></span></li>
+              <li key={r.id}><span className="grow"><span className="nm">{r.nick}</span><br /><span className="sub">{hhmm(r.ts)} · {'놀림당함 ' + Math.round(((r as any).holdMs ?? 0) / 1000) + '초' + (r.amountKrw ? ' · ' + won(r.amountKrw) + ' 요구' : '')}</span></span></li>
             ))}</ul>
           )}
         </section>
