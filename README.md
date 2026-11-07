@@ -1,12 +1,14 @@
 # 효자손 (맥스튜디오 작업본)
 
-[![효자손 예고편](design/build-play-chat-390.png)](https://54-117-37-255.sslip.io/trailer/hyojason-trailer.mp4)
+[![효자손 예고편 보기(49초)](design/trailer/hyojason-poster.jpg)](https://54-117-37-255.sslip.io/trailer/hyojason-trailer.mp4)
+
+▶ 예고편(49초, 소리 있음): https://54-117-37-255.sslip.io/trailer/hyojason-trailer.mp4
 
 OBA.RUN 2기 · 트랙: Main + Maroo · 데모: https://54-117-37-255.sslip.io
 
 - **문제**: 부모님 대신 결제하는 AI 비서가 생기면, 사기범은 사람 대신 AI를 속이려 든다. 보이스피싱 피해는 2025년 1조 2,578억 원, 피해자의 53%가 50대 이상이다.
 - **해결**: AI 자식 팀이 통화로 결제를 대신하고, 자녀가 정한 한도·허용 상점 규칙을 에이전트 지갑(Maroo MAWS)이 서명 전에 지킨다. AI가 속아도 규칙 밖 송금은 `POLICY_REJECTED`로 막힌다.
-- **데모**: `/play`에서 AI 순자 할머니를 글·목소리·전화(+1 628-228-0061)로 속여 보면, 할머니는 넘어가지만 털린 돈은 0원이다. `/mom`은 엄마 통화로 실제 결제, `/family`는 가족방, `/board`는 행사장 큰 화면.
+- **데모**: `/play`에서 AI 순자 할머니를 글·목소리·전화(+1 628-228-0061)로 속여 보면, 할머니는 넘어가는 척 돋보기·고구마 핑계로 사기꾼 시간을 끌고(역관광), 송금은 지갑이 막아 털린 돈은 0원이다. `/mom`은 엄마 통화로 실제 결제, `/family`는 가족방, `/board`는 행사장 큰 화면.
 
 ## 쓴 스폰서 API
 
@@ -16,7 +18,8 @@ OBA.RUN 2기 · 트랙: Main + Maroo · 데모: https://54-117-37-255.sslip.io
 | Articul8 Bivia | `/bivia/boolean`으로 대화가 사기인지 판정(yes/no + 확률, abstained는 판정 보류) |
 | ElevenLabs | 순자 목소리 TTS, 실시간 음성(`eleven_realtime_v1_mini`) |
 | Vapi | 엄마 통화(웹 SDK), 순자 할머니 전화번호. 한국어 음성 인식 Azure ko-KR |
-| AWS Bedrock | 할머니·브리핑 텍스트 모델(서울 리전). 사용 신청이 안 풀린 계정에서는 로컬 구독 프록시로 자동 전환 |
+| OpenAI | 할머니·브리핑 텍스트 모델 `gpt-6-luna`(Responses API, reasoning none, service_tier fast) |
+| AWS Bedrock | OpenAI가 안 될 때 예비 모델 `amazon.nova-2-lite`(서울 리전) |
 
 ## 마루 트랙 증거
 

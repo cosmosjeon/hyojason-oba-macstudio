@@ -63,7 +63,8 @@ export default function Play() {
     }
     setCool(Math.round(r.cooldownMs / 1000));
     setMsgs((x) => [...x, { id: uid++, role: 'them', text: r.reply, audio: r.audioUrl }]);
-    void say(r.audioUrl).then(async () => {
+    // 소리가 막히거나 재생이 끝날 소식이 없어도 후속 대사는 나오게, 길어도 12초 뒤에는 넘어간다.
+    void Promise.race([say(r.audioUrl).catch(() => {}), new Promise((res) => setTimeout(res, 12000))]).then(async () => {
       if (r.fell) {
         await new Promise((res) => setTimeout(res, 500));
         setMsgs((x) => [...x, { id: uid++, role: 'them', text: r.followup, audio: r.followupAudioUrl }]);
