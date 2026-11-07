@@ -88,9 +88,10 @@ app.get('/api/merchants', (c) => c.json(Object.keys(merchants)));
 app.post('/api/mom/pay', rateLimit('pay', 6, 60_000), globalLimit('pay', 12, 3_600_000), async (c) => { const b = await c.req.json().catch(() => ({})); return c.json(await momPay(cleanText(b.merchant, 10), Number(b.amountKrw), cleanText(b.note, 40))); });
 app.post('/api/mom/scamcheck', rateLimit('scam', 6, 60_000), globalLimit('scam', 60, 60_000), async (c) => { const b = await c.req.json().catch(() => ({})); const text = cleanText(b.text, 600); if (!text) return c.json({ error: '내용을 붙여 넣어 주세요.' }, 400); return c.json(await checkScam(text)); });
 app.get('/api/family/settings', (c) => c.json({ ...getSettings(), all: Object.keys(merchants) }));
-app.post('/api/family/settings', adminOnly, async (c) => {
+// 누구나 써 볼 수 있게 열되, 한도는 정해진 값만·상점은 고정 3곳만 받고 횟수를 막는다(사기범 주소는 절대 허용 목록에 못 들어감).
+app.post('/api/family/settings', rateLimit('settings', 3, 60_000), globalLimit('settings', 15, 3_600_000), async (c) => {
   const b = await c.req.json().catch(() => ({}));
-  const limitKrw = Math.max(1000, Math.min(1_000_000, Math.round(Number(b.limitKrw) / 1000) * 1000));
+  const limitKrw = [50_000, 100_000, 300_000, 500_000].includes(Number(b.limitKrw)) ? Number(b.limitKrw) : 100_000;
   const list = (Array.isArray(b.merchants) ? b.merchants : []).filter((m: string) => merchants[m]);
   if (!list.length) return c.json({ error: '허용 상점을 하나 이상 골라 주세요.' }, 400);
   const set = { limitKrw, merchants: list };
@@ -101,7 +102,7 @@ app.post('/api/family/settings', adminOnly, async (c) => {
 });
 app.get('/api/family/feed', (c) => c.json({ feed: feedList(), approvals: approvals(), briefing: lastBriefing(), explorer: EXPLORER }));
 app.post('/api/family/briefing', rateLimit('brief', 3, 60_000), globalLimit('brief', 30, 3_600_000), async (c) => c.json(await briefing()));
-app.post('/api/family/approvals/:id/:act', adminOnly, async (c) => c.json(await decideApproval(Number(c.req.param('id')), c.req.param('act') === 'approve')));
+app.post('/api/family/approvals/:id/:act', rateLimit('approve', 5, 60_000), globalLimit('approve', 20, 3_600_000), async (c) => c.json(await decideApproval(Number(c.req.param('id')), c.req.param('act') === 'approve')));
 app.get('/api/family/wallets', adminOnly, async (c) => {
   const [m, g] = await Promise.all([maws('agent.balance', { agentId: momAgent }), maws('agent.balance', { agentId: grandmaAgent })]);
   return c.json({ mom: m.data, grandma: g.data });
