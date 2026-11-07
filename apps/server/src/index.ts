@@ -58,7 +58,7 @@ app.get('/events', (c) => subscriberCount() > 80 ? c.json({ error: 'busy' }, 503
   }
   unsub();
 }));
-app.post('/api/battle', adminOnly, async (c) => { const b = await c.req.json().catch(() => ({})); setBattle(!!b.on); return c.json({ on: battleOn() }); });
+app.post('/api/battle', rateLimit('battle', 10, 60_000), async (c) => { const b = await c.req.json().catch(() => ({})); setBattle(!!b.on); return c.json({ on: battleOn() }); });
 
 // ---- 실시간 음성
 app.post('/api/realtime/session', rateLimit('rt', 20, 60_000), globalLimit('rt', 40, 60_000), async (c) => {
