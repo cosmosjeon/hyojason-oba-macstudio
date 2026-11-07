@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Volume2, VolumeX } from 'lucide-react';
 
@@ -8,17 +8,30 @@ const POSTER = '/trailer/hyojason-poster.jpg';
 
 export default function Home() {
   const ref = useRef<HTMLVideoElement>(null);
-  const [sound, setSound] = useState(false);
   const [failed, setFailed] = useState(false);
+  // 버튼 글자는 내 상태값이 아니라 영상의 실제 상태(음소거·로딩)에서만 정한다.
+  const [audible, setAudible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // 소리를 켜면 45초 예고편으로 바꿔 처음부터 재생하고, 끄면 15초 루프로 돌아간다.
+  useEffect(() => {
+    const v = ref.current; if (!v) return;
+    const sync = () => setAudible(!v.muted && !v.paused && v.src.endsWith(FULL));
+    const wait = () => setLoading(v.src.endsWith(FULL) && !v.muted);
+    const ready = () => setLoading(false);
+    const evs: [string, () => void][] = [['volumechange', sync], ['play', sync], ['pause', sync], ['playing', () => { ready(); sync(); }], ['waiting', wait], ['loadstart', wait], ['canplay', ready]];
+    evs.forEach(([e, f]) => v.addEventListener(e, f));
+    return () => evs.forEach(([e, f]) => v.removeEventListener(e, f));
+  }, [failed]);
+
+  // 소리 없는 15초 반복본에는 소리가 없다. 처음 켤 때만 49초 예고편으로 바꾸고, 그 뒤로는 음소거만 켜고 끈다.
   function toggle() {
-    const v = ref.current; const next = !sound;
-    setSound(next);
-    if (!v) return;
-    v.src = next ? FULL : LOOP; v.muted = !next; v.loop = true; v.load();
-    void v.play().catch(() => { v.muted = true; setSound(false); });
+    const v = ref.current; if (!v) return;
+    if (audible || (loading && !v.muted)) { v.muted = true; setLoading(false); return; }
+    if (!v.src.endsWith(FULL)) { v.src = FULL; v.loop = true; v.load(); }
+    v.muted = false;
+    void v.play().catch(() => { v.muted = true; });
   }
+  const on = audible || loading;
   return (
     <div className="shell">
       <main className="page" style={{ padding: 0, gap: 0 }}>
@@ -28,8 +41,8 @@ export default function Home() {
             <video ref={ref} src={LOOP} poster={POSTER} autoPlay muted loop playsInline preload="auto" onError={() => setFailed(true)} aria-label="효자손 예고편" />
           )}
           {!failed && (
-            <button className="btn sm weak hero-sound" onClick={toggle} aria-pressed={sound}>
-              {sound ? <VolumeX size={18} /> : <Volume2 size={18} />}{sound ? '소리 끄기' : '소리 켜기'}
+            <button className="btn sm weak hero-sound" onClick={toggle} aria-pressed={on}>
+              {on ? <VolumeX size={18} /> : <Volume2 size={18} />}{loading ? '불러오는 중' : on ? '소리 끄기' : '소리 켜기'}
             </button>
           )}
         </div>
