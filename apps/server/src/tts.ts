@@ -14,7 +14,7 @@ export async function tts(text: string, voice: 'grandma' | 'scammer' = 'grandma'
     const r = await fetch('https://api.elevenlabs.io/v1/text-to-speech/' + voiceId + '?output_format=mp3_22050_32', {
       method: 'POST',
       headers: { 'xi-api-key': process.env.ELEVENLABS_API_KEY!, 'content-type': 'application/json' },
-      body: JSON.stringify({ text, model_id: 'eleven_flash_v2_5', language_code: 'ko' }),
+      body: JSON.stringify({ text, model_id: voice === 'scammer' ? 'eleven_multilingual_v2' : 'eleven_flash_v2_5', ...(voice === 'scammer' ? {} : { language_code: 'ko' }) }),
       signal: AbortSignal.timeout(20000),
     });
     if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
