@@ -163,7 +163,7 @@ h2.sec { margin: 0; font-size: var(--text-section); font-weight: 700; line-heigh
 .qr-url { flex-basis: 100%; font-weight: 700; font-size: clamp(.8125rem, 1.05vw, 1rem); overflow-wrap: anywhere; color: var(--night-muted); } .qr-card .qr { background: #fff; padding: 10px; border-radius: var(--radius-lg); line-height: 0; flex: none; }
 .btn.night { background: var(--color-lime-500); color: var(--color-ink); }
 @media (max-width: 1100px) { .b-battle, .b-side { grid-column: 1 / -1; } }
-@media (max-width: 640px) { .b-stats { grid-template-columns: 1fr 1fr; } .qr-card { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 640px) { .b-stats { grid-template-columns: 1fr 1fr; } .qr-card { flex-direction: column; align-items: flex-start; } .qr-url { flex-basis: auto; width: 100%; } }
 
 /* ===== 통화 화면 ===== */
 .call { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; width: min(100vw, 470px); margin-inline: auto; background: #0b0a0a; color: #fff; overflow: hidden; isolation: isolate; animation: callin var(--duration-normal) var(--ease) both; }
@@ -201,3 +201,5 @@ h2.sec { margin: 0; font-size: var(--text-section); font-weight: 700; line-heigh
 .hero-video { position: relative; width: 100%; aspect-ratio: 9 / 16; max-height: calc(100dvh - 92px); background: #10191c; overflow: hidden; }
 .hero-video video { width: 100%; height: 100%; object-fit: contain; display: block; }
 .hero-sound { position: absolute; right: var(--space-3); top: var(--space-3); background: rgba(255,255,255,.92); }
+
+/* 작은 폰 리더보드 */ @media (max-width: 400px) { .b-stats { grid-template-columns: minmax(0,1fr) minmax(0,1fr); } .b-stat { min-width: 0; } .b-stat .v { font-size: 1.4rem; white-space: nowrap; } .qr-card { flex-wrap: wrap; } .qr-card > * { min-width: 0; max-width: 100%; } .qr-url { white-space: normal !important; overflow-wrap: anywhere; word-break: break-all; } }
