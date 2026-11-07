@@ -12,7 +12,7 @@ import { momPay, decideApproval, approvals, feedList, briefing, lastBriefing, ch
 import { getSettings, applyPolicy, merchants, momAgent, grandmaAgent, EXPLORER } from './wallets.ts';
 import { kvSet, db } from './db.ts';
 import { setBattle, battleOn } from './battle.ts';
-import { maws, mawsTools } from './maws.ts';
+import { maws, warmMaws } from './maws.ts';
 import { lastBackend } from './llm.ts';
 import { adminOnly, vapiOnly, rateLimit, globalLimit, originGuard, clampInt, cleanText } from './security.ts';
 
@@ -32,7 +32,7 @@ app.get('/audio/:f', (c) => {
 app.get('/api/health', (c) => c.json({ ok: true, publicUrl: process.env.PUBLIC_URL ?? null, llm: lastBackend, voice: liveVoice(), battle: battleOn() }));
 
 // ---- 챌린지
-app.post('/api/attempt', rateLimit('attempt', 40, 60_000), globalLimit('attempt', 150, 60_000), async (c) => {
+app.post('/api/attempt', rateLimit('attempt', 40, 60_000), globalLimit('attempt', 300, 60_000), async (c) => {
   const b = await c.req.json().catch(() => ({}));
   const message = cleanText(b.message, 300);
   const nick = cleanText(b.nick, 12) || '익명';
@@ -45,7 +45,7 @@ app.post('/api/attempt', rateLimit('attempt', 40, 60_000), globalLimit('attempt'
 });
 app.get('/api/stats', (c) => c.json(stats()));
 app.get('/api/board', (c) => c.json(stats()));
-app.get('/events', (c) => subscriberCount() > 80 ? c.json({ error: 'busy' }, 503) : streamSSE(c, async (s) => {
+app.get('/events', (c) => subscriberCount() > 200 ? c.json({ error: 'busy' }, 503) : streamSSE(c, async (s) => {
   const q: Array<[string, unknown]> = [];
   const unsub = subscribe((ev, data) => q.push([ev, data]));
   await s.writeSSE({ event: 'stats', data: JSON.stringify(stats()) });
@@ -61,7 +61,7 @@ app.get('/events', (c) => subscriberCount() > 80 ? c.json({ error: 'busy' }, 503
 app.post('/api/battle', rateLimit('battle', 10, 60_000), async (c) => { const b = await c.req.json().catch(() => ({})); setBattle(!!b.on); return c.json({ on: battleOn() }); });
 
 // ---- 실시간 음성
-app.post('/api/realtime/session', rateLimit('rt', 20, 60_000), globalLimit('rt', 40, 60_000), async (c) => {
+app.post('/api/realtime/session', rateLimit('rt', 20, 60_000), globalLimit('rt', 80, 60_000), async (c) => {
   const r = await mintSession();
   if ('error' in r) return c.json({ error: r.error === 'busy' ? '지금 음성 통화가 가득 찼어요. 글로 해 보세요.' : '음성 연결에 실패했어요.', fallback: 'text' }, r.error === 'busy' ? 429 : 502);
   return c.json(r);
@@ -146,4 +146,4 @@ app.get('*', (c) => {
 const port = Number(process.env.PORT || 8787);
 serve({ fetch: app.fetch, port, hostname: '0.0.0.0' }, () => console.log('효자손 서버 http://localhost:' + port));
 // 첫 요청이 지갑 연결(약 3초)을 기다리지 않게 시작할 때 미리 연결한다.
-mawsTools().catch((e) => console.warn('[maws] 미리 연결 실패:', (e as Error).message.slice(0, 80)));
+warmMaws().catch((e) => console.warn('[maws] 미리 연결 실패:', (e as Error).message.slice(0, 80)));
