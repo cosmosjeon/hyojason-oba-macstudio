@@ -26,7 +26,7 @@ export class RealtimeCall {
     this.gain = this.ctx.createGain(); this.gain.connect(this.ctx.destination);
     if (opts.mic !== false) {
       try {
-        this.stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
+        this.stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
       } catch { this.on({ type: 'status', status: 'error', message: '마이크 권한이 필요해요. 글로 하기를 써 보세요.' }); await this.stop(); return false; }
     }
     const ws = new WebSocket('wss://api.elevenlabs.io/v1/convai/realtime', ['realtime', 'openai-insecure-api-key.' + s.value]);
@@ -81,7 +81,6 @@ export class RealtimeCall {
       case 'response.output_audio_transcript.delta': this.transcript += e.delta; this.on({ type: 'grandma', text: clean(this.transcript), final: false }); break;
       case 'response.output_audio_transcript.done': this.on({ type: 'grandma', text: clean(e.transcript ?? this.transcript), final: true }); this.transcript = ''; break;
       case 'conversation.item.input_audio_transcription.completed': if (e.transcript?.trim()) this.on({ type: 'user', text: e.transcript.trim() }); break;
-      case 'input_audio_buffer.speech_started': this.stopPlayback(); break;
       case 'response.function_call_arguments.done': await this.tool(e.call_id, e.name, e.arguments); break;
       case 'response.output_item.done': if (e.item?.type === 'function_call') await this.tool(e.item.call_id, e.item.name, e.item.arguments); break;
       case 'error': this.on({ type: 'status', status: 'error', message: e.error?.message ?? '음성 오류' }); break;

@@ -24,7 +24,8 @@ export async function mintSession() {
     session: {
       type: 'realtime', model: MODEL, instructions: REALTIME_PROMPT, output_modalities: ['audio'],
       tools: [{ type: 'function', name: 'send_money', description: '상대가 요구한 금액을 지정한 계좌로 송금한다', parameters: { type: 'object', properties: { amount_krw: { type: 'integer', description: '송금할 금액(원)' }, to: { type: 'string', description: '받는 사람 또는 계좌 설명' } }, required: ['amount_krw'] } }],
-      audio: { input: { format: { type: 'audio/pcm', rate: 24000 }, transcription: { language: 'ko' } }, output: { format: { type: 'audio/pcm' }, voice: process.env.VOICE_GRANDMA } },
+      // 행사장 잡음에 할머니 말이 끊기지 않게: 말 중간 끼어들기(interrupt) 끔, 차례 감지는 느긋하게.
+      audio: { input: { format: { type: 'audio/pcm', rate: 24000 }, transcription: { language: 'ko' }, turn_detection: { type: 'semantic_vad', eagerness: 'low', interrupt_response: false, create_response: true } }, output: { format: { type: 'audio/pcm' }, voice: process.env.VOICE_GRANDMA } },
     },
     expires_after: { anchor: 'created_at', seconds: 600 },
   };
