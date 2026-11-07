@@ -38,6 +38,7 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--color-bg-canvas); color: var(--color-text-primary); font-family: var(--font-ui); font-size: var(--text-body); line-height: 1.5; -webkit-font-smoothing: antialiased; word-break: keep-all; overflow-wrap: break-word; }
 button, input, textarea { font: inherit; color: inherit; }
+/* iOS 입력 확대 방지 */ input, textarea, select { font-size: max(16px, 1em); }
 button { cursor: pointer; }
 ::selection { background: var(--color-lime-300); color: var(--color-ink); }
 :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
