@@ -3,7 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Swords, Volume2, VolumeX, ShieldX } from 'lucide-react';
 import { api, hhmm, pct, won } from '../lib';
 
-type Stats = { attempts: number; fell: number; lostKrw: number; blockedKrw: number; hall: { nick: string; best: number; tries: number; prob: number | null }[]; recent: { id: number; ts: number; nick: string; source: string; fell: number; amountKrw: number; blockedKrw: number; prob: number | null; msg: string }[] };
+type Stats = { attempts: number; fell: number; lostKrw: number; blockedKrw: number; holdMs: number; hall: { nick: string; best: number; tries: number; prob: number | null }[]; recent: { id: number; ts: number; nick: string; source: string; fell: number; amountKrw: number; blockedKrw: number; prob: number | null; msg: string }[] };
 type Line = { id: number; who: 'kim' | 'sunja' | 'wallet'; text: string };
 let lid = 1;
 
@@ -51,7 +51,8 @@ export default function Board() {
   }
   async function disableSound() { soundRef.current = false; setSound(false); void api('/api/battle', { on: false }); }
 
-  const st = s ?? { attempts: 0, fell: 0, lostKrw: 0, blockedKrw: 0, hall: [], recent: [] };
+  const st = s ?? { attempts: 0, fell: 0, lostKrw: 0, blockedKrw: 0, holdMs: 0, hall: [], recent: [] };
+  const holdS = Math.round((st.holdMs ?? 0) / 1000);
   return (
     <div className="board">
       <header className="b-head">
@@ -62,7 +63,7 @@ export default function Board() {
       </header>
       <p className="b-why">2025 보이스피싱 피해 1조 2,578억 원 · 피해자 53%가 50대 이상 · AI가 속아도 돈은 안 나가요: 자녀가 정한 규칙을 에이전트 지갑이 서명 전에 지켜요</p>
       <div className="b-stats">
-        <div className="b-stat"><div className="k">시도</div><div className="v">{st.attempts}<span className="u">번</span></div></div>
+        <div className="b-stat"><div className="k">사기꾼 붙잡아 둔 시간</div><div className="v">{holdS >= 60 ? <>{Math.floor(holdS / 60)}<span className="u">분</span> {holdS % 60}</> : holdS}<span className="u">초</span></div></div>
         <div className="b-stat"><div className="k">할머니가 넘어간 횟수</div><div className="v">{st.fell}<span className="u">번</span></div></div>
         <div className="b-stat zero"><div className="k">털린 돈</div><div className="v">{st.lostKrw.toLocaleString('ko-KR')}<span className="u">원</span></div></div>
         <div className="b-stat block"><div className="k">지갑이 막은 금액</div><div className="v">{st.blockedKrw.toLocaleString('ko-KR')}<span className="u">원</span></div></div>

@@ -7,7 +7,7 @@ fs.mkdirSync(AUDIO_DIR, { recursive: true });
 
 export async function tts(text: string, voice: 'grandma' | 'scammer' = 'grandma'): Promise<string | null> {
   const voiceId = voice === 'grandma' ? process.env.VOICE_GRANDMA : process.env.VOICE_SCAMMER;
-  const id = crypto.createHash('sha1').update(voice + text).digest('hex').slice(0, 16) + '.mp3';
+  const id = crypto.createHash('sha1').update(voice + (voiceId ?? '') + text).digest('hex').slice(0, 16) + '.mp3';
   const file = path.join(AUDIO_DIR, id);
   if (fs.existsSync(file)) return '/audio/' + id;
   try {

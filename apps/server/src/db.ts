@@ -14,5 +14,7 @@ create table if not exists feed(id integer primary key autoincrement, ts integer
 create table if not exists kv(k text primary key, v text not null);
 create table if not exists approvals(id integer primary key autoincrement, ts integer not null, merchant text not null, amount_krw integer not null, note text, status text not null default 'pending', tx_hash text);
 `);
+// 사기범을 붙잡아 둔 시간(할머니 음성 길이). 예전 DB에는 없는 칸이라 있을 때만 추가한다.
+if (!(db.prepare("select 1 from pragma_table_info('attempts') where name='hold_ms'").get())) db.exec('alter table attempts add column hold_ms integer not null default 0');
 export const kvGet = <T>(k: string, d: T): T => { const r: any = db.prepare('select v from kv where k=?').get(k); return r ? JSON.parse(r.v) : d; };
 export const kvSet = (k: string, v: unknown) => { db.prepare('insert into kv(k,v) values(?,?) on conflict(k) do update set v=excluded.v').run(k, JSON.stringify(v)); };
