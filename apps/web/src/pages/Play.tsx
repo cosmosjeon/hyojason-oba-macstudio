@@ -108,7 +108,7 @@ export default function Play() {
           <>
             <div>
               <h1 className="title">AI 순자 할머니를 털어 보세요</h1>
-              <p className="lead">할머니가 송금을 시도하게 만들면 이겨요.</p>
+              <p className="lead">할머니는 절대 안 보내요. 대신 얼마나 오래 놀림당하는지 겨뤄요.</p>
             </div>
             <div className="field">
               <label htmlFor="nick">닉네임</label>

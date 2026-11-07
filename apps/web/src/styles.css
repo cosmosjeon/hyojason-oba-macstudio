@@ -203,3 +203,5 @@ h2.sec { margin: 0; font-size: var(--text-section); font-weight: 700; line-heigh
 .hero-sound { position: absolute; right: var(--space-3); top: var(--space-3); background: rgba(255,255,255,.92); }
 
 /* 작은 폰 리더보드 */ @media (max-width: 400px) { .b-stats { grid-template-columns: minmax(0,1fr) minmax(0,1fr); } .b-stat { min-width: 0; } .b-stat .v { font-size: 1.4rem; white-space: nowrap; } .qr-card { flex-wrap: wrap; } .qr-card > * { min-width: 0; max-width: 100%; } .qr-url { white-space: normal !important; overflow-wrap: anywhere; word-break: break-all; } }
+
+/* 큰 화면 시간 한 줄 */ .b-stat .v { white-space: nowrap; font-size: clamp(1.4rem, 4vw, 4.5rem); }

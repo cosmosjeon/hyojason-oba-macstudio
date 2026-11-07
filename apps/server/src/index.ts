@@ -8,7 +8,7 @@ import { subscribe, subscriberCount } from './bus.ts';
 import { AUDIO_DIR } from './tts.ts';
 import { mintSession, endSession, liveVoice, useTool } from './realtime.ts';
 import { runTool, handleVapi } from './vapi.ts';
-import { momPay, decideApproval, approvals, feedList, briefing, lastBriefing, checkScam } from './family.ts';
+import { momPay, decideApproval, approvals, feedList, briefing, lastBriefing, checkScam, momScamTest } from './family.ts';
 import { getSettings, applyPolicy, merchants, momAgent, grandmaAgent, EXPLORER } from './wallets.ts';
 import { kvSet, db } from './db.ts';
 import { setBattle, battleOn } from './battle.ts';
@@ -86,6 +86,7 @@ app.get('/api/vapi/config', (c) => {
 // ---- 엄마·가족
 app.get('/api/merchants', (c) => c.json(Object.keys(merchants)));
 app.post('/api/mom/pay', rateLimit('pay', 12, 60_000), globalLimit('pay', 12, 3_600_000), async (c) => { const b = await c.req.json().catch(() => ({})); return c.json(await momPay(cleanText(b.merchant, 10), Number(b.amountKrw), cleanText(b.note, 40))); });
+app.post('/api/mom/scamtest', rateLimit('scamtest', 10, 60_000), globalLimit('scamtest', 120, 3_600_000), async (c) => c.json(await momScamTest()));
 app.post('/api/mom/scamcheck', rateLimit('scam', 20, 60_000), globalLimit('scam', 60, 60_000), async (c) => { const b = await c.req.json().catch(() => ({})); const text = cleanText(b.text, 600); if (!text) return c.json({ error: '내용을 붙여 넣어 주세요.' }, 400); return c.json(await checkScam(text)); });
 app.get('/api/family/settings', (c) => c.json({ ...getSettings(), all: Object.keys(merchants) }));
 // 누구나 써 볼 수 있게 열되, 한도는 정해진 값만·상점은 고정 3곳만 받고 횟수를 막는다(사기범 주소는 절대 허용 목록에 못 들어감).

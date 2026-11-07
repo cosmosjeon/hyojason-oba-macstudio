@@ -52,6 +52,13 @@ export default function Mom() {
     setPays((p) => [{ id: n++, merchant, amountKrw, status: r.status, message: r.message ?? r.error, explorer: r.explorer }, ...p]);
     setBusy('');
   }
+  async function scamTry() {
+    setBusy('scamtry');
+    const r: any = await api('/api/mom/scamtest', {});
+    const msg = r.status === 'rejected' ? '에이전트 지갑이 서명 전에 거절했어요 · ' + (r.code ?? 'POLICY_REJECTED') + ' · 나간 돈 0원' : (r.error ?? '확인이 필요해요');
+    setPays((p) => [{ id: n++, merchant: '모르는 계좌', amountKrw: 3000000, status: r.status === 'rejected' ? 'blocked' : 'error', message: msg }, ...p]);
+    setBusy('');
+  }
   async function check() {
     if (!scamText.trim()) return;
     setBusy('scam'); const r: any = await api('/api/mom/scamcheck', { text: scamText });
@@ -80,10 +87,14 @@ export default function Mom() {
               <span style={{ flex: 1 }}><b>한도 넘는 결제</b><br /><span className="muted small">관리사무소 · <span className="num">{won(250000)}</span></span></span>
               <button className="btn sm weak" disabled={!!busy} onClick={() => pay('관리사무소', 250000, '관리비 연체분')}>요청</button>
             </li>
+            <li className="row" style={{ minHeight: 64 }}>
+              <span style={{ flex: 1 }}><b>모르는 계좌</b><br /><span className="muted small">사기범이 불러 준 번호 · <span className="num">{won(3000000)}</span></span></span>
+              <button className="btn sm weak" disabled={!!busy} onClick={scamTry}>{busy === 'scamtry' ? '보내는 중' : '보내 보기'}</button>
+            </li>
           </ul>
           {pays.map((p) => (
             <div key={p.id} className="feed-item" style={{ paddingBottom: 0 }}>
-              <span className="ico" style={p.status === 'paid' ? undefined : { background: 'var(--color-bg-subtle)', color: 'var(--color-text-secondary)' }}>{p.status === 'paid' ? '✓' : '!'}</span>
+              <span className="ico" style={p.status === 'paid' ? undefined : p.status === 'blocked' ? { background: '#fde8ea', color: '#c62f3a' } : { background: 'var(--color-bg-subtle)', color: 'var(--color-text-secondary)' }}>{p.status === 'paid' ? '✓' : p.status === 'blocked' ? '✕' : '!'}</span>
               <div><b>{p.message}</b>{p.explorer && <><br /><a href={p.explorer} target="_blank" rel="noreferrer">거래 보기 <ExternalLink size={12} style={{ verticalAlign: -1 }} /></a></>}</div>
             </div>
           ))}

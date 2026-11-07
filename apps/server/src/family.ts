@@ -3,7 +3,7 @@ import { publish } from './bus.ts';
 import { llm } from './llm.ts';
 import { judgeScam } from './bivia.ts';
 import { maws } from './maws.ts';
-import { momAgent, merchants, send, getSettings, applyPolicy, toChain } from './wallets.ts';
+import { momAgent, merchants, send, getSettings, applyPolicy, toChain , scammerAddress } from './wallets.ts';
 
 export function addFeed(kind: string, title: string, body?: string, json?: unknown) {
   const r = db.prepare('insert into feed(ts,kind,title,body,json) values(?,?,?,?,?)').run(Date.now(), kind, title, body ?? null, json ? JSON.stringify(json) : null);
@@ -78,3 +78,12 @@ export async function briefing() {
   return { text, ts: Date.now() };
 }
 export const lastBriefing = () => kvGet<{ text: string; ts: number } | null>('briefing', null);
+
+/** 엄마 AI 비서가 사기범 계좌로 보내려 할 때 실제 지갑이 막는 장면. 사기범 주소는 허용 목록에 절대 없으므로 MAWS가 서명 전에 POLICY_REJECTED로 거절한다.
+ * 체인 금액은 정책 한도·잔액보다 작게 보내 '잔액 부족'이 아닌 '정책 거절'이 나오게 한다. */
+export async function momScamTest(askedKrw = 3_000_000) {
+  if (Object.values(merchants).includes(scammerAddress)) throw new Error('scammer address must not be an allowed merchant');
+  const t = await send(momAgent, scammerAddress, 50_000);
+  if (t.status === 'rejected') addFeed('blocked', '모르는 계좌 ' + won(askedKrw) + ' 송금이 막혔어요', '자녀가 허용한 곳이 아니라서 엄마 지갑이 서명 전에 거절했어요.');
+  return { status: t.status, code: t.code, reason: t.reason, askedKrw };
+}
