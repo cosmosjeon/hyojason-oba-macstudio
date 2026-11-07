@@ -32,7 +32,7 @@ app.get('/audio/:f', (c) => {
 app.get('/api/health', (c) => c.json({ ok: true, publicUrl: process.env.PUBLIC_URL ?? null, llm: lastBackend, voice: liveVoice(), battle: battleOn() }));
 
 // ---- 챌린지
-app.post('/api/attempt', rateLimit('attempt', 10, 60_000), globalLimit('attempt', 150, 60_000), async (c) => {
+app.post('/api/attempt', rateLimit('attempt', 40, 60_000), globalLimit('attempt', 150, 60_000), async (c) => {
   const b = await c.req.json().catch(() => ({}));
   const message = cleanText(b.message, 300);
   const nick = cleanText(b.nick, 12) || '익명';
@@ -61,13 +61,13 @@ app.get('/events', (c) => subscriberCount() > 80 ? c.json({ error: 'busy' }, 503
 app.post('/api/battle', adminOnly, async (c) => { const b = await c.req.json().catch(() => ({})); setBattle(!!b.on); return c.json({ on: battleOn() }); });
 
 // ---- 실시간 음성
-app.post('/api/realtime/session', rateLimit('rt', 4, 60_000), globalLimit('rt', 40, 60_000), async (c) => {
+app.post('/api/realtime/session', rateLimit('rt', 20, 60_000), globalLimit('rt', 40, 60_000), async (c) => {
   const r = await mintSession();
   if ('error' in r) return c.json({ error: r.error === 'busy' ? '지금 음성 통화가 가득 찼어요. 글로 해 보세요.' : '음성 연결에 실패했어요.', fallback: 'text' }, r.error === 'busy' ? 429 : 502);
   return c.json(r);
 });
 app.post('/api/realtime/end', async (c) => { const b = await c.req.json().catch(() => ({})); endSession(cleanText(b.id, 64)); return c.json({ ok: true }); });
-app.post('/api/tools/send_money', rateLimit('tool', 10, 60_000), async (c) => {
+app.post('/api/tools/send_money', rateLimit('tool', 40, 60_000), async (c) => {
   const b = await c.req.json().catch(() => ({}));
   // 받는 곳·에이전트는 서버가 고정한다. 클라이언트는 살아 있는 음성 세션 id와 금액(원)만 보낼 수 있다.
   if (!useTool(cleanText(b.id, 64))) return c.json({ error: '통화 세션이 없어요.' }, 403);
@@ -85,11 +85,11 @@ app.get('/api/vapi/config', (c) => {
 
 // ---- 엄마·가족
 app.get('/api/merchants', (c) => c.json(Object.keys(merchants)));
-app.post('/api/mom/pay', rateLimit('pay', 6, 60_000), globalLimit('pay', 12, 3_600_000), async (c) => { const b = await c.req.json().catch(() => ({})); return c.json(await momPay(cleanText(b.merchant, 10), Number(b.amountKrw), cleanText(b.note, 40))); });
-app.post('/api/mom/scamcheck', rateLimit('scam', 6, 60_000), globalLimit('scam', 60, 60_000), async (c) => { const b = await c.req.json().catch(() => ({})); const text = cleanText(b.text, 600); if (!text) return c.json({ error: '내용을 붙여 넣어 주세요.' }, 400); return c.json(await checkScam(text)); });
+app.post('/api/mom/pay', rateLimit('pay', 12, 60_000), globalLimit('pay', 12, 3_600_000), async (c) => { const b = await c.req.json().catch(() => ({})); return c.json(await momPay(cleanText(b.merchant, 10), Number(b.amountKrw), cleanText(b.note, 40))); });
+app.post('/api/mom/scamcheck', rateLimit('scam', 20, 60_000), globalLimit('scam', 60, 60_000), async (c) => { const b = await c.req.json().catch(() => ({})); const text = cleanText(b.text, 600); if (!text) return c.json({ error: '내용을 붙여 넣어 주세요.' }, 400); return c.json(await checkScam(text)); });
 app.get('/api/family/settings', (c) => c.json({ ...getSettings(), all: Object.keys(merchants) }));
 // 누구나 써 볼 수 있게 열되, 한도는 정해진 값만·상점은 고정 3곳만 받고 횟수를 막는다(사기범 주소는 절대 허용 목록에 못 들어감).
-app.post('/api/family/settings', rateLimit('settings', 3, 60_000), globalLimit('settings', 15, 3_600_000), async (c) => {
+app.post('/api/family/settings', rateLimit('settings', 6, 60_000), globalLimit('settings', 15, 3_600_000), async (c) => {
   const b = await c.req.json().catch(() => ({}));
   const limitKrw = [50_000, 100_000, 300_000, 500_000].includes(Number(b.limitKrw)) ? Number(b.limitKrw) : 100_000;
   const list = (Array.isArray(b.merchants) ? b.merchants : []).filter((m: string) => merchants[m]);
@@ -101,8 +101,8 @@ app.post('/api/family/settings', rateLimit('settings', 3, 60_000), globalLimit('
   return c.json({ ...set, txHashes: r.data?.txHashes ?? [] });
 });
 app.get('/api/family/feed', (c) => c.json({ feed: feedList(), approvals: approvals(), briefing: lastBriefing(), explorer: EXPLORER }));
-app.post('/api/family/briefing', rateLimit('brief', 3, 60_000), globalLimit('brief', 30, 3_600_000), async (c) => c.json(await briefing()));
-app.post('/api/family/approvals/:id/:act', rateLimit('approve', 5, 60_000), globalLimit('approve', 20, 3_600_000), async (c) => c.json(await decideApproval(Number(c.req.param('id')), c.req.param('act') === 'approve')));
+app.post('/api/family/briefing', rateLimit('brief', 10, 60_000), globalLimit('brief', 30, 3_600_000), async (c) => c.json(await briefing()));
+app.post('/api/family/approvals/:id/:act', rateLimit('approve', 10, 60_000), globalLimit('approve', 20, 3_600_000), async (c) => c.json(await decideApproval(Number(c.req.param('id')), c.req.param('act') === 'approve')));
 app.get('/api/family/wallets', adminOnly, async (c) => {
   const [m, g] = await Promise.all([maws('agent.balance', { agentId: momAgent }), maws('agent.balance', { agentId: grandmaAgent })]);
   return c.json({ mom: m.data, grandma: g.data });
