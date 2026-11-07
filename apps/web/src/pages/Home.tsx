@@ -36,7 +36,7 @@ export default function Home() {
     <div className="shell">
       <main className="page" style={{ padding: 0, gap: 0 }}>
         <div className="hero-video">
-          {failed && <img src={POSTER} alt="효자손 화면" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
+          {failed && <img src={POSTER} alt="효자손 화면" style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
           {!failed && (
             <video ref={ref} src={LOOP} poster={POSTER} autoPlay muted loop playsInline preload="auto" onError={() => setFailed(true)} aria-label="효자손 예고편" />
           )}
