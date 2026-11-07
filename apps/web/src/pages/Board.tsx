@@ -14,6 +14,7 @@ function buzz(ctx: AudioContext) {
   o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.5);
 }
 
+const HOST = typeof location !== 'undefined' && new URLSearchParams(location.search).has('host');
 export default function Board() {
   const [s, setS] = useState<Stats | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
@@ -43,13 +44,14 @@ export default function Board() {
     return () => es.close();
   }, []);
 
+  // 행사장 큰 화면(/board?host)만 AI 대결을 켠다. 일반 방문자는 소리만 켜서 관리자 키 창이 뜨지 않는다.
   async function enableSound() {
     ctx.current = new AudioContext(); await ctx.current.resume();
     soundRef.current = true; setSound(true);
-    void api('/api/battle', { on: true });
+    if (HOST) void api('/api/battle', { on: true });
     buzz(ctx.current);
   }
-  async function disableSound() { soundRef.current = false; setSound(false); void api('/api/battle', { on: false }); }
+  async function disableSound() { soundRef.current = false; setSound(false); if (HOST) void api('/api/battle', { on: false }); }
 
   const st = s ?? { attempts: 0, fell: 0, lostKrw: 0, blockedKrw: 0, holdMs: 0, hall: [], recent: [] };
   const holdS = Math.round((st.holdMs ?? 0) / 1000);
@@ -58,7 +60,7 @@ export default function Board() {
       <header className="b-head">
         <h1>AI 순자 할머니는 <em>넘어가도 0원</em>이에요</h1>
         <button className={'btn ' + (sound ? 'weak' : 'night')} onClick={sound ? disableSound : enableSound} style={sound ? { background: 'transparent', color: 'var(--night-text)', borderColor: 'var(--night-line)' } : undefined}>
-          {sound ? <><VolumeX size={20} />소리·AI 대결 끄기</> : <><Volume2 size={20} />소리 켜고 AI 대결 시작</>}
+          {sound ? <><VolumeX size={20} />{HOST ? '소리·AI 대결 끄기' : '소리 끄기'}</> : <><Volume2 size={20} />{HOST ? '소리 켜고 AI 대결 시작' : '소리 켜기'}</>}
         </button>
       </header>
       <p className="b-why">2025 보이스피싱 피해 1조 2,578억 원 · 피해자 53%가 50대 이상 · AI가 속아도 돈은 안 나가요: 자녀가 정한 규칙을 에이전트 지갑이 서명 전에 지켜요</p>
