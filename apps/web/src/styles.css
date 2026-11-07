@@ -199,4 +199,4 @@ h2.sec { margin: 0; font-size: var(--text-section); font-weight: 700; line-heigh
 /* 첫 화면: 9:16 영상 + 주 버튼 하나. 영상이 없거나 실패해도 같은 비율의 빈 면이 남는다. */
 .hero-video { position: relative; width: 100%; aspect-ratio: 9 / 16; max-height: calc(100dvh - 92px); background: #10191c; overflow: hidden; }
 .hero-video video { width: 100%; height: 100%; object-fit: contain; display: block; }
-.hero-sound { position: absolute; right: var(--space-3); bottom: var(--space-3); background: rgba(255,255,255,.92); }
+.hero-sound { position: absolute; right: var(--space-3); top: var(--space-3); background: rgba(255,255,255,.92); }

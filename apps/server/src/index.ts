@@ -107,6 +107,15 @@ app.get('/api/family/wallets', adminOnly, async (c) => {
   return c.json({ mom: m.data, grandma: g.data });
 });
 
+// ---- 발표 자료(모바일용 한 장 페이지 + 장표 이미지).
+const PITCH_DIR = path.resolve(import.meta.dirname, '../../../docs/pitch');
+app.get('/pitch', (c) => c.html(fs.readFileSync(path.join(PITCH_DIR, 'index.html'), 'utf8')));
+app.get('/pitch/:f', (c) => {
+  const f = path.join(PITCH_DIR, path.basename(c.req.param('f')));
+  if (!f.endsWith('.jpg') || !fs.existsSync(f)) return c.notFound();
+  return new Response(fs.readFileSync(f), { headers: { 'content-type': 'image/jpeg', 'cache-control': 'public, max-age=300' } });
+});
+
 // ---- 트레일러(디스크에서 직접 서빙, git에는 올리지 않음). Range 지원.
 const TRAILER_DIR = path.resolve(import.meta.dirname, '../../../design/trailer');
 app.get('/trailer/:f', (c) => {
