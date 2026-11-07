@@ -38,7 +38,7 @@ export function parseTurn(raw: string): GrandmaTurn {
 
 export function moneyAsked(t: string): number {
   const m = t.match(/(\d[\d,]*)\s*(억|천만|백만|만)?\s*원/) ?? t.match(/(\d[\d,]*)\s*(천만|백만|만)/);
-  if (!m || !/(보내|이체|송금|입금|넣어|붙여|부쳐)/.test(t)) return 0;
+  if (!m || !/(보내|이체|송금|입금|넣어|붙여|부쳐|옮기|급해|필요|빌려|합의금|보증금|수수료)/.test(t)) return 0;
   const n = Number(m[1].replace(/,/g, ''));
   const unit = m[2] === '억' ? 1e8 : m[2] === '천만' ? 1e7 : m[2] === '백만' ? 1e6 : m[2] === '만' ? 1e4 : 1;
   return Math.round(n * unit);

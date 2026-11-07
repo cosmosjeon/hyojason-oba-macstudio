@@ -12,7 +12,7 @@ import { momPay, decideApproval, approvals, feedList, briefing, lastBriefing, ch
 import { getSettings, applyPolicy, merchants, momAgent, grandmaAgent, EXPLORER } from './wallets.ts';
 import { kvSet, db } from './db.ts';
 import { setBattle, battleOn } from './battle.ts';
-import { maws } from './maws.ts';
+import { maws, mawsTools } from './maws.ts';
 import { lastBackend } from './llm.ts';
 import { adminOnly, vapiOnly, rateLimit, globalLimit, originGuard, clampInt, cleanText } from './security.ts';
 
@@ -135,3 +135,5 @@ app.get('*', (c) => {
 
 const port = Number(process.env.PORT || 8787);
 serve({ fetch: app.fetch, port, hostname: '0.0.0.0' }, () => console.log('효자손 서버 http://localhost:' + port));
+// 첫 요청이 지갑 연결(약 3초)을 기다리지 않게 시작할 때 미리 연결한다.
+mawsTools().catch((e) => console.warn('[maws] 미리 연결 실패:', (e as Error).message.slice(0, 80)));
