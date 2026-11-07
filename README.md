@@ -4,6 +4,8 @@
 
 ▶ 예고편(49초, 소리 있음): https://54-117-37-255.sslip.io/trailer/hyojason-trailer.mp4
 
+📑 발표 자료: [docs/hyojason-pitch.pdf](docs/hyojason-pitch.pdf)
+
 OBA.RUN 2기 · 트랙: Main + Maroo · 데모: https://54-117-37-255.sslip.io
 
 - **문제**: 부모님 대신 결제하는 AI 비서가 생기면, 사기범은 사람 대신 AI를 속이려 든다. 보이스피싱 피해는 2025년 1조 2,578억 원, 피해자의 53%가 50대 이상이다.
@@ -16,10 +18,10 @@ OBA.RUN 2기 · 트랙: Main + Maroo · 데모: https://54-117-37-255.sslip.io
 |---|---|
 | Maroo MAWS (Agent Wallet) | 에이전트 2개(`맥스튜디오-순자할머니`, `맥스튜디오-엄마`) 생성, `policy.set`, `policy.preflight`, `transfer.send`. 가스는 PAYMASTER |
 | Articul8 Bivia | `/bivia/boolean`으로 대화가 사기인지 판정(yes/no + 확률, abstained는 판정 보류) |
-| ElevenLabs | 순자 목소리 TTS, 실시간 음성(`eleven_realtime_v1_mini`) |
 | Vapi | 엄마 통화(웹 SDK), 순자 할머니 전화번호. 한국어 음성 인식 Azure ko-KR |
 | OpenAI | 할머니·브리핑 텍스트 모델 `gpt-6-luna`(Responses API, reasoning none, service_tier fast) |
-| AWS Bedrock | OpenAI가 안 될 때 예비 모델 `amazon.nova-2-lite`(서울 리전) |
+
+음성 합성과 서버 호스팅은 일반 클라우드 서비스를 썼다.
 
 ## 마루 트랙 증거
 
