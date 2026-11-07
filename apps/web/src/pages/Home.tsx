@@ -48,6 +48,11 @@ export default function Home() {
         </div>
         <div style={{ padding: 'var(--space-4) var(--space-5) calc(var(--space-5) + env(safe-area-inset-bottom))' }}>
           <Link to="/play" className="btn block lime" style={{ minHeight: 60, textDecoration: 'none', fontSize: 'var(--text-section)' }}>순자 할머니 털어 보기</Link>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 10 }}>
+            <Link to="/mom" className="btn weak" style={{ textDecoration: 'none', minHeight: 52, fontSize: 15 }}>엄마 결제</Link>
+            <Link to="/family/settings" className="btn weak" style={{ textDecoration: 'none', minHeight: 52, fontSize: 15 }}>자녀 규칙</Link>
+            <Link to="/family" className="btn weak" style={{ textDecoration: 'none', minHeight: 52, fontSize: 15 }}>가족방</Link>
+          </div>
         </div>
       </main>
     </div>
